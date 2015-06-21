@@ -154,7 +154,9 @@ sub new {
                 is eval { $rsrc->column_info('Foo')->{default_value} }, 42, 'default_value detected for mixed case column';
 
                 # test the fixed up ->_dbh_type_info_type_name for the ODBC driver
-                if ($schema->storage->_dbi_connect_info->[0] =~ /:ODBC:/i) {
+                SKIP: {
+                    skip '_dbh_type_info_type_name test is only for DBD::ODBC', 3
+                        unless $schema->storage->_dbi_connect_info->[0] =~ /:ODBC:/i;
                     my %truncated_types = (
                         4 => 'INTEGER',
                         -9 => 'VARCHAR(x) CHARACTER SET UNICODE_FSS',
@@ -166,10 +168,6 @@ sub new {
                             $truncated_types{$type_num},
                             "ODBC ->_dbh_type_info_type_name correct for '$truncated_types{$type_num}'";
                     }
-                }
-                else {
-                    my $tb = Test::More->builder;
-                    $tb->skip('not testing _dbh_type_info_type_name on DBD::InterBase') for 1..3;
                 }
             },
         },
