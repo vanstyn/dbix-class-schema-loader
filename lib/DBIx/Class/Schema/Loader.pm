@@ -10,7 +10,7 @@ use Scalar::Util 'weaken';
 use Sub::Util 'set_subname';
 use DBIx::Class::Schema::Loader::Utils 'array_eq';
 use Try::Tiny;
-use Hash::Merge 'merge';
+use Hash::Merge ();
 use curry;
 use namespace::clean;
 
@@ -225,6 +225,8 @@ sub _invoke_loader {
 # maintaining things to do with DBIC guts, which we have no business of
 # maintaining. But at the moment it would be just dead code in DBIC, so we'll
 # maintain it here.
+my $merge = Hash::Merge->new;
+$merge->set_clone_behavior(0);
 sub _merge_state_from {
     my ($self, $from) = @_;
 
@@ -233,10 +235,10 @@ sub _merge_state_from {
 
     $self->_copy_state_from($from);
 
-    $self->class_mappings(merge($orig_class_mappings, $self->class_mappings))
+    $self->class_mappings($merge->merge($orig_class_mappings, $self->class_mappings))
         if $orig_class_mappings;
 
-    $self->source_registrations(merge($orig_source_registrations, $self->source_registrations))
+    $self->source_registrations($merge->merge($orig_source_registrations, $self->source_registrations))
         if $orig_source_registrations;
 }
 
